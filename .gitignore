@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.log
+uploads/
+.DS_Store
+*.tsbuildinfo
+.env
+.qodo
+**.txt

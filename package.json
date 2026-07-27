@@ -1,0 +1,15 @@
+{
+    "name": "job-matching",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "concurrently \"npm --workspace apps/web run dev\" \"npm --workspace apps/api run dev\"",
+        "build": "npm --workspace apps/web run build && npm --workspace apps/api run build"
+    },
+    "devDependencies": {
+        "concurrently": "^9.0.1"
+    }
+}
