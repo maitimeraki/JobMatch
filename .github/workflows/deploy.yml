@@ -57,8 +57,12 @@ jobs:
       - name: Build Project Locally
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
 
+      # FIX: Copy the local vercel configuration metadata to the root folder so the deploy agent sees your shared node_modules
+      - name: Link Build Output to Root
+        run: cp -r apps/web/.vercel .vercel
+
       - name: Deploy Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   # ──────────────────────────────────────────────
   # 2. DEPLOY BACKEND TO VERCEL (serverless)
@@ -97,5 +101,9 @@ jobs:
       - name: Build Project Locally
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
 
+      # FIX: Clear any old configurations and copy the api vercel metadata to the root folder before deploying
+      - name: Link Build Output to Root
+        run: rm -rf .vercel && cp -r apps/api/.vercel .vercel
+
       - name: Deploy Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
