@@ -217,7 +217,7 @@ export const dashboardService = {
         where: { recruiterId },
         select: { skills: true },
       });
-      requiredSkills = [...new Set(jobs.flatMap((j) => j?.skills as string[] ?? "Unknown"))];
+      requiredSkills = [...new Set(jobs.flatMap((j: any) => j.skills ?? []))];
     }
 
     if (requiredSkills.length === 0) {
