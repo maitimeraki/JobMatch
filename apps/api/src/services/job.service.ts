@@ -71,7 +71,7 @@ function formatApplication(
     resumeUrl: app.resumeUrl as string,
     coverLetter: (app.coverLetter as string) ?? null,
     status: app.status as ApplicationResponse["status"],
-    source: (app.source as string) ?? "DIRECT",
+    source: (app.source as ApplicationResponse["source"]) ?? "DIRECT",
     createdAt,
   };
 }

@@ -49,7 +49,7 @@ export const payoutService = {
       throw new AppError(409, "ALREADY_PAID", "Payout already processed");
     }
 
-    const totalAmount = referral.job.referralBonus || 0;
+    const totalAmount = referral.job?.referralBonus ?? 0;
     const platformFee = Math.round((totalAmount * PLATFORM_FEE_PERCENT) / 100);
     const netAmount = totalAmount - platformFee;
 
@@ -57,7 +57,7 @@ export const payoutService = {
       null,
       totalAmount,
       "USD",
-      `Referral payout: ${referral.job.title}`
+      `Referral payout: ${referral.job?.title}`
     );
     if (!payment.success) {
       throw new AppError(402, "PAYMENT_FAILED", "Payment declined");
@@ -71,7 +71,7 @@ export const payoutService = {
       referral.requesterId,
       "PAYOUT_RECEIVED",
       "Referral Bonus Paid!",
-      `You received $${(netAmount / 100).toFixed(0)} for "${referral.job.title}"`,
+      `You received $${(netAmount / 100).toFixed(0)} for "${referral.job?.title ?? "Unknown"}"`,
       "/referrals"
     );
 

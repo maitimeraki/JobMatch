@@ -148,7 +148,7 @@ export const endorsementService = {
       "DevOps",
     ];
 
-    const skills = [];
+    const skills: any[] = [];
     for (const name of skillNames) {
       const skill = await prisma.skill.upsert({
         where: { name },

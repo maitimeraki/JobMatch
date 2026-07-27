@@ -265,6 +265,7 @@ model JobListing {
   bookmarks      Bookmark[]
   boostPurchases BoostPurchase[]
   shortlists     CandidateShortlist[] @relation("ShortlistJob")
+  referralRequests ReferralRequest[]
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
 
@@ -323,6 +324,7 @@ model ReferralRequest {
   connectorId String
   connector   User           @relation("Connector", fields: [connectorId], references: [id], onDelete: Cascade)
   jobId       String?
+  job         JobListing?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
   message     String?        @db.Text
   status      ReferralStatus @default(PENDING)
   createdAt   DateTime       @default(now())

@@ -6,11 +6,11 @@ import { AppError } from "../middleware/error.middleware.js";
 import type { RegisterInput, UserResponse, AuthTokens } from "@jobmatch/shared";
 
 function generateAccessToken(payload: { id: string; role: string }): string {
-  return jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_ACCESS_EXPIRY });
+  return jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_ACCESS_EXPIRY } as jwt.SignOptions);
 }
 
 function generateRefreshToken(payload: { id: string }): string {
-  return jwt.sign(payload, env.JWT_REFRESH_SECRET, { expiresIn: env.JWT_REFRESH_EXPIRY });
+  return jwt.sign(payload, env.JWT_REFRESH_SECRET, { expiresIn: env.JWT_REFRESH_EXPIRY } as jwt.SignOptions);
 }
 
 function generateTokens(payload: { id: string; role: string }): AuthTokens {
@@ -49,9 +49,10 @@ function formatUser(user: Record<string, unknown>): UserResponse {
           location: (profile.location as string) ?? null,
           website: (profile.website as string) ?? null,
           skills: (profile.skills as string[]) ?? [],
-          experience: (profile.experience as Record<string, unknown>[]) ?? [],
-          education: (profile.education as Record<string, unknown>[]) ?? [],
+          experience: (profile.experience as import("@jobmatch/shared").Experience[]) ?? [],
+          education: (profile.education as import("@jobmatch/shared").Education[]) ?? [],
           resumeUrl: (profile.resumeUrl as string) ?? null,
+          communityScore: (profile.communityScore as number) ?? 0,
         }
       : null,
   };
