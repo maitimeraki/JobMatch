@@ -1,6 +1,11 @@
 import prisma from "../config/db.js";
 import { emitToUser } from "./socket.js";
-import type { NotificationType } from "@prisma/client";
+
+type NotificationType =
+  | "FOLLOW" | "LIKE" | "COMMENT" | "POST_ENDORSED"
+  | "REFERRAL_REQUEST" | "REFERRAL_ACCEPTED" | "APPLICATION_UPDATE"
+  | "NEW_APPLICANT" | "JOB_RECOMMENDATION" | "PROFILE_VIEWED"
+  | "JOB_BOOSTED" | "PREMIUM_EXPIRING" | "PAYOUT_RECEIVED";
 
 export const notificationService = {
   async createNotification(
