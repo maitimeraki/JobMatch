@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
 
 jobs:
   # ──────────────────────────────────────────────
@@ -58,6 +58,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-version: latest # Forces installation of a supported Vercel CLI version
           vercel-args: "--prod"
           working-directory: apps/web
 
@@ -96,5 +97,6 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_API_PROJECT_ID }}
+          vercel-version: latest # Forces installation of a supported Vercel CLI version
           vercel-args: "--prod"
           working-directory: apps/api
