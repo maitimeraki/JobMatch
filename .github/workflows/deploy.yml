@@ -59,7 +59,7 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-version: latest # Forces installation of a supported Vercel CLI version
-          vercel-args: "--prod"
+          vercel-args: "--prod --prebuilt" # <--- ADD --prebuilt HERE
           working-directory: apps/web
 
   # ──────────────────────────────────────────────
@@ -98,5 +98,5 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_API_PROJECT_ID }}
           vercel-version: latest # Forces installation of a supported Vercel CLI version
-          vercel-args: "--prod"
+          vercel-args: "--prod --prebuilt" # <--- ADD --prebuilt HERE
           working-directory: apps/api
