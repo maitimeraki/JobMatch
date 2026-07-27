@@ -61,7 +61,9 @@ jobs:
           vercel-version: latest # Forces installation of a supported Vercel CLI version
           vercel-build: true # <--- Fix: Tells the action to pull & compile local packages
           target: production
-          working-directory: apps/web
+          # FIX: Run from root and point Vercel to your subfolder configuration
+          working-directory: ./ 
+          vercel-args: "--cwd apps/web"
 
   # ──────────────────────────────────────────────
   # 2. DEPLOY BACKEND TO VERCEL (serverless)
@@ -101,4 +103,6 @@ jobs:
           vercel-version: latest # Forces installation of a supported Vercel CLI version
           vercel-build: true # <--- Fix: Tells the action to pull & compile local packages
           target: production
-          working-directory: apps/api
+          # FIX: Run from root and point Vercel to your subfolder configuration
+          working-directory: ./
+          vercel-args: "--cwd apps/api"
