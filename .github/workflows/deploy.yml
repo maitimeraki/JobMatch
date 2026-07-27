@@ -59,7 +59,8 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-version: latest # Forces installation of a supported Vercel CLI version
-          vercel-args: "--prod" # <--- ADD --prebuilt HERE
+          vercel-build: true # <--- Fix: Tells the action to pull & compile local packages
+          target: production
           working-directory: apps/web
 
   # ──────────────────────────────────────────────
@@ -98,5 +99,6 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_API_PROJECT_ID }}
           vercel-version: latest # Forces installation of a supported Vercel CLI version
-          vercel-args: "--prod" # <--- ADD --prebuilt HERE
+          vercel-build: true # <--- Fix: Tells the action to pull & compile local packages
+          target: production
           working-directory: apps/api
