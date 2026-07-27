@@ -1,0 +1,474 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  SEEKER
+  RECRUITER
+  ADMIN
+}
+
+enum PostCategory {
+  PROJECT_SHOWCASE
+  LEARNING
+  QUESTION
+  ACHIEVEMENT
+  DISCUSSION
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum JobStatus {
+  ACTIVE
+  PAUSED
+  CLOSED
+  DRAFT
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+enum ApplicationSource {
+  DIRECT
+  REFERRAL
+}
+
+enum ReferralStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COMPLETED
+}
+
+enum PlanTier {
+  FREE
+  PRO
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PAID
+  FAILED
+}
+
+enum NotificationType {
+  FOLLOW
+  LIKE
+  COMMENT
+  POST_ENDORSED
+  REFERRAL_REQUEST
+  REFERRAL_ACCEPTED
+  APPLICATION_UPDATE
+  NEW_APPLICANT
+  JOB_RECOMMENDATION
+  PROFILE_VIEWED
+  JOB_BOOSTED
+  PREMIUM_EXPIRING
+  PAYOUT_RECEIVED
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String?
+  name          String
+  avatar        String?
+  role          UserRole  @default(SEEKER)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile                  Profile?
+  posts                    Post[]
+  comments                 Comment[]
+  likes                    Like[]
+  followsFollowing         Follow[]             @relation("Following")
+  followsFollower          Follow[]             @relation("Follower")
+  jobsPosted               JobListing[]
+  applications             Application[]
+  bookmarks                Bookmark[]
+  notifications            Notification[]
+  sessions                 Session[]
+  endorsementsGiven        Endorsement[]        @relation("Endorser")
+  endorsementsReceived     Endorsement[]        @relation("Endorsed")
+  referralRequestsSent     ReferralRequest[]    @relation("Requester")
+  referralRequestsReceived ReferralRequest[]    @relation("Connector")
+  boostPurchases           BoostPurchase[]
+  recruiterPlan            RecruiterPlan?
+  seekerPremium            SeekerPremium?
+  activityLogsViewed       ActivityLog[]        @relation("ViewedActivities")
+  activityLogsViewer       ActivityLog[]        @relation("ViewerActivities")
+  shortlistedCandidates    CandidateShortlist[] @relation("ShortlistRecruiter")
+  shortlistedBy            CandidateShortlist[] @relation("ShortlistCandidate")
+  companyProfile           CompanyProfile?      @relation("CompanyOwner")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Profile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio            String?  @db.Text
+  headline       String?
+  location       String?
+  website        String?
+  skills         String[]
+  experience     Json?    @default("[]")
+  education      Json?    @default("[]")
+  resumeUrl      String?
+  company        String?  // recruiter: company they work at
+  currentRole    String?  // recruiter: current job title
+  communityScore Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Skill {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  endorsements Endorsement[]
+
+  @@map("skills")
+}
+
+model Endorsement {
+  id         String   @id @default(uuid())
+  endorserId String
+  endorser   User     @relation("Endorser", fields: [endorserId], references: [id], onDelete: Cascade)
+  endorsedId String
+  endorsed   User     @relation("Endorsed", fields: [endorsedId], references: [id], onDelete: Cascade)
+  skillId    String
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  postId     String?  @map("post_id")
+  createdAt  DateTime @default(now())
+
+  @@unique([endorserId, endorsedId, skillId])
+  @@index([endorsedId])
+  @@index([skillId])
+  @@map("endorsements")
+}
+
+model Post {
+  id        String       @id @default(uuid())
+  authorId  String
+  author    User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String       @db.Text
+  category  PostCategory @default(DISCUSSION)
+  mediaUrl  String?
+  mediaType MediaType?
+  likes     Like[]
+  comments  Comment[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([createdAt])
+  @@index([authorId])
+  @@index([category])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model JobListing {
+  id             String          @id @default(uuid())
+  recruiterId    String
+  recruiter      User            @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  title          String
+  description    String          @db.Text
+  location       String
+  type           JobType         @default(FULL_TIME)
+  level          ExperienceLevel @default(MID)
+  salaryMin      Int?
+  salaryMax      Int?
+  salaryCurrency String          @default("USD")
+  skills         String[]
+  status         JobStatus       @default(ACTIVE)
+
+  // Monetization fields
+  isFeatured        Boolean   @default(false)
+  featuredExpiresAt DateTime?
+  isUrgent          Boolean   @default(false)
+  urgentExpiresAt   DateTime?
+  referralBonus     Int?
+  referralCurrency  String    @default("USD")
+
+  applications   Application[]
+  bookmarks      Bookmark[]
+  boostPurchases BoostPurchase[]
+  shortlists     CandidateShortlist[] @relation("ShortlistJob")
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([type, level])
+  @@index([isFeatured, featuredExpiresAt])
+  @@index([isUrgent, urgentExpiresAt])
+}
+
+model Application {
+  id          String            @id @default(uuid())
+  jobId       String
+  job         JobListing        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicantId String
+  applicant   User              @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  resumeUrl   String
+  coverLetter String?           @db.Text
+  status      ApplicationStatus @default(PENDING)
+  source      ApplicationSource @default(DIRECT)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  statusHistory ApplicationStatusHistory[]
+
+  @@unique([jobId, applicantId])
+}
+
+model ApplicationStatusHistory {
+  id            String            @id @default(uuid())
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status        ApplicationStatus
+  note          String?
+  createdAt     DateTime          @default(now())
+
+  @@index([applicationId])
+  @@map("application_status_history")
+}
+
+model Bookmark {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       JobListing @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+
+  @@unique([userId, jobId])
+}
+
+model ReferralRequest {
+  id          String         @id @default(uuid())
+  requesterId String
+  requester   User           @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  connectorId String
+  connector   User           @relation("Connector", fields: [connectorId], references: [id], onDelete: Cascade)
+  jobId       String?
+  message     String?        @db.Text
+  status      ReferralStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  payout ReferralPayout?
+
+  @@index([status])
+  @@index([connectorId])
+  @@map("referral_requests")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+}
+
+model CompanyProfile {
+  id          String   @id @default(uuid())
+  recruiterId String   @unique
+  companyName String
+  logo        String?
+  website     String?
+  description String?  @db.Text
+  size        String?
+  industry    String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recruiter User @relation("CompanyOwner", fields: [recruiterId], references: [id], onDelete: Cascade)
+
+  @@map("company_profiles")
+}
+
+model CandidateShortlist {
+  id          String   @id @default(uuid())
+  recruiterId String
+  candidateId String
+  jobId       String?
+  note        String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  recruiter User        @relation("ShortlistRecruiter", fields: [recruiterId], references: [id], onDelete: Cascade)
+  candidate User        @relation("ShortlistCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  job       JobListing? @relation("ShortlistJob", fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@unique([recruiterId, candidateId])
+  @@index([recruiterId])
+  @@map("candidate_shortlists")
+}
+
+// ─── Revenue & Monetization Models ────────────────────────────
+
+model RecruiterPlan {
+  id                  String    @id @default(uuid())
+  recruiterId         String    @unique
+  recruiter           User      @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  tier                PlanTier  @default(FREE)
+  activeJobsUsed      Int       @default(0)
+  maxActiveJobs       Int       @default(1)
+  maxApplicantsPerJob Int       @default(10)
+  maxCandidateViews   Int       @default(10)
+  candidateViewsUsed  Int       @default(0)
+  verified            Boolean   @default(false)
+  verifiedAt          DateTime?
+
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscribedAt         DateTime?
+  expiresAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@map("recruiter_plans")
+}
+
+model SeekerPremium {
+  id              String    @id @default(uuid())
+  seekerId        String    @unique
+  seeker          User      @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  active          Boolean   @default(false)
+  stripeSessionId String?
+  subscribedAt    DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("seeker_premiums")
+}
+
+model BoostPurchase {
+  id                    String     @id @default(uuid())
+  jobId                 String
+  job                   JobListing @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  recruiterId           String
+  recruiter             User       @relation(fields: [recruiterId], references: [id])
+  type                  String
+  amount                Int
+  currency              String     @default("USD")
+  stripePaymentIntentId String?
+  active                Boolean    @default(true)
+  startsAt              DateTime   @default(now())
+  expiresAt             DateTime
+  createdAt             DateTime   @default(now())
+
+  @@index([jobId])
+  @@index([recruiterId])
+  @@index([expiresAt])
+  @@map("boost_purchases")
+}
+
+model ReferralPayout {
+  id          String          @id @default(uuid())
+  referralId  String          @unique
+  referral    ReferralRequest @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  amount      Int // Full referral bonus in cents
+  platformFee Int // Platform cut in cents (10%)
+  netAmount   Int // What the referrer gets (amount - platformFee)
+  status      PayoutStatus    @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("referral_payouts")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  viewerId  String
+  viewer    User     @relation("ViewerActivities", fields: [viewerId], references: [id], onDelete: Cascade)
+  targetId  String
+  target    User     @relation("ViewedActivities", fields: [targetId], references: [id], onDelete: Cascade)
+  jobId     String?
+  createdAt DateTime @default(now())
+
+  @@index([targetId, createdAt])
+  @@index([viewerId])
+  @@map("activity_logs")
+}
