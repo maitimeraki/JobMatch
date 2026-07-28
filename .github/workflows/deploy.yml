@@ -1,5 +1,4 @@
 name: CD — Deploy to Vercel
-
 on:
   push:
     branches: [main]
@@ -22,7 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
 
 jobs:
   # ──────────────────────────────────────────────
@@ -37,29 +36,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Install Project Dependencies
         run: npm ci
 
-      - name: Build web app
-        working-directory: apps/web
-        run: npm run build
+      - name: Pull Vercel Environment Info
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL || secrets.VITE_API_URL }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod"
-          working-directory: apps/web
+      - name: Build Project Locally
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/web
+
+      # FIX: Copy the local vercel configuration metadata to the root folder so the deploy agent sees your shared node_modules
+      - name: Link Build Output to Root
+        run: cp -r apps/web/.vercel .vercel
+
+      - name: Deploy Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   # ──────────────────────────────────────────────
   # 2. DEPLOY BACKEND TO VERCEL (serverless)
@@ -73,28 +76,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Install Project Dependencies
         run: npm ci
 
-      - name: Generate Prisma client
+      - name: Generate Prisma Client
         working-directory: apps/api
         run: npx prisma generate
 
-      - name: Build API
-        working-directory: apps/api
-        run: npm run build
+      - name: Pull Vercel Environment Info
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_API_PROJECT_ID }}
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_API_PROJECT_ID }}
-          vercel-args: "--prod"
-          working-directory: apps/api
+      - name: Build Project Locally
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
+
+      # FIX: Clear any old configurations and copy the api vercel metadata to the root folder before deploying
+      - name: Link Build Output to Root
+        run: rm -rf .vercel && cp -r apps/api/.vercel .vercel
+
+      - name: Deploy Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
