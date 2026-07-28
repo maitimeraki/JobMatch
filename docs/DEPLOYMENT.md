@@ -154,8 +154,8 @@ Go to your repo → Settings → Secrets and variables → Actions → New repos
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_API_URL` | Production API URL (e.g., `https://your-api.onrender.com/api/v1`) |
-| `VITE_SOCKET_URL` | Production Socket.io URL (e.g., `https://your-api.onrender.com`) |
+| `VITE_API_URL` | Production API URL (e.g., `https://jobmatch-api.vercel.app/api/v1`) |
+| `VITE_SOCKET_URL` | Production Socket.io URL (e.g., `https://jobmatch-api.vercel.app`) |
 
 ---
 
@@ -192,8 +192,8 @@ Go to your repo → Settings → Secrets and variables → Actions → New repos
    - Install Command: `cd ../.. && npm ci`
 
 4. **Set environment variables in Vercel:**
-   - `VITE_API_URL`: `https://your-api.onrender.com/api/v1`
-   - `VITE_SOCKET_URL`: `https://your-api.onrender.com`
+   - `VITE_API_URL`: `https://jobmatch-api.vercel.app/api/v1`
+   - `VITE_SOCKET_URL`: `https://jobmatch-api.vercel.app`
 
 5. **Push to `main`** → workflow triggers → deploys automatically.
 
@@ -326,7 +326,7 @@ git push
 │                                              │
 │ 1. Push migration file to main               │
 │ 2. GitHub Actions runs CI (typecheck + build)│
-│ 3. Render auto-deploys if connected          │
+│ 3. Vercel auto-deploys on push to main       │
 │ 4. Start command: prisma migrate deploy      │
 │    (applies any pending migrations)          │
 │ 5. Server starts                             │
