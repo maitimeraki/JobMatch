@@ -2,10 +2,7 @@
   "$schema": "https://vercel.sh",
   "outputDirectory": ".",
   "routes": [
-    {
-      "source": "/(.*)",
-      "dest": "api/index.ts"
-    }
+    { "source": "/(.*)", "dest": "api/index.ts" }
   ],
   "functions": {
     "api/index.ts": {
