@@ -1,13 +1,14 @@
 {
-  "$schema": "https://vercel.sh",
-  "outputDirectory": ".",
-  "routes": [
-    { "source": "/(.*)", "dest": "/api/index.ts" }
-  ],
   "functions": {
     "api/index.ts": {
       "memory": 256,
       "maxDuration": 10
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.ts"
+    }
+  ]
 }
