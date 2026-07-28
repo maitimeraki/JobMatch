@@ -1,20 +1,12 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
+  "$schema": "https://vercel.sh",
+  "outputDirectory": ".",
   "routes": [
     {
-      "src": "/(.*)",
+      "source": "/(.*)",
       "dest": "api/index.ts"
     }
   ],
-  "installCommand": "cd ../.. && npm ci",
-  "buildCommand": "npx prisma generate && npm run build",
-  "outputDirectory": ".",
   "functions": {
     "api/index.ts": {
       "memory": 256,
