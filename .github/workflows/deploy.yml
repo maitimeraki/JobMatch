@@ -92,6 +92,10 @@ jobs:
       # Now zod, typescript, etc. exist
       - name: Build Shared Package
         run: npm --workspace @jobmatch/shared run build
+      - name: Verify shared package
+        run: |
+          ls -R packages/shared/dist
+          ls -l node_modules/@jobmatch
       
       - name: Generate Prisma Client
         working-directory: apps/api
@@ -113,3 +117,7 @@ jobs:
       
       - name: Deploy
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Verify Vercel output
+        run: |
+          find .vercel/output/node_modules/@jobmatch -maxdepth 3
+          find .vercel/output/functions/api/index.func -maxdepth 3
