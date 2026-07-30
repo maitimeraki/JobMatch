@@ -79,45 +79,117 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      
+
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
-      
-      # Install EVERYTHING first
-      - name: Install Project Dependencies
+
+      #################################################################
+      # Install ALL workspace dependencies
+      #################################################################
+
+      - name: Install dependencies
         run: npm ci
-      
-      # Now zod, typescript, etc. exist
+
+      #################################################################
+      # Build the shared workspace package
+      #################################################################
+
       - name: Build Shared Package
         run: npm --workspace @jobmatch/shared run build
-      - name: Verify shared package
+
+      #################################################################
+      # Verify workspace
+      #################################################################
+
+      - name: Verify Shared Package
         run: |
+          echo "===== Shared dist ====="
           ls -R packages/shared/dist
+
+          echo ""
+          echo "===== Workspace link ====="
           ls -l node_modules/@jobmatch
-      
+
+      #################################################################
+      # Prisma
+      #################################################################
+
       - name: Generate Prisma Client
         working-directory: apps/api
         run: npx prisma generate
-      
+
+      #################################################################
+      # Pull Vercel project
+      #################################################################
+
       - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
+        run: |
+          vercel pull \
+            --yes \
+            --environment=production \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --cwd apps/api
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_API_PROJECT_ID }}
-      
-      - name: Build Project
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
-      
+
+      #################################################################
+      # Build
+      #################################################################
+
+      - name: Build with Vercel
+        run: |
+          vercel build \
+            --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --cwd apps/api
+
+      #################################################################
+      # Debug output
+      #################################################################
+
+      - name: Inspect Build Output
+        run: |
+          echo "===== Output ====="
+          find apps/api/.vercel/output -maxdepth 5
+
+          echo ""
+          echo "===== Function ====="
+          find apps/api/.vercel/output/functions/api/index.func -maxdepth 5
+
+          echo ""
+          echo "===== Shared ====="
+          find apps/api/.vercel/output -name shared
+
+      #################################################################
+      # Fail if omitted
+      #################################################################
+
+      - name: Verify Shared In Function
+        run: |
+          if [ ! -d apps/api/.vercel/output/functions/api/index.func/node_modules/@jobmatch/shared ]; then
+            echo "ERROR: @jobmatch/shared NOT packaged into Lambda."
+            exit 1
+          fi
+
+      #################################################################
+      # Link build
+      #################################################################
+
       - name: Link Build Output
         run: |
           rm -rf .vercel
           cp -r apps/api/.vercel .vercel
-      
+
+      #################################################################
+      # Deploy
+      #################################################################
+
       - name: Deploy
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Verify Vercel output
         run: |
-          find .vercel/output/node_modules/@jobmatch -maxdepth 3
-          find .vercel/output/functions/api/index.func -maxdepth 3
+          vercel deploy \
+            --prebuilt \
+            --prod \
+            --token=${{ secrets.VERCEL_TOKEN }}
