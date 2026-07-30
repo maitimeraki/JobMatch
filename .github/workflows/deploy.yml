@@ -86,7 +86,7 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Install Project Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma Client
         working-directory: apps/api
@@ -97,10 +97,6 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_API_PROJECT_ID }}
-      - name: Verify shared package
-        run: |
-          ls -la node_modules/@jobmatch
-          cat node_modules/@jobmatch/shared/package.json
 
       - name: Build Project Locally
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd apps/api
