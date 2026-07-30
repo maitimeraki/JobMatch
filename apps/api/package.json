@@ -13,7 +13,7 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@jobmatch/shared": "*",
+    "@jobmatch/shared":"workspace:*",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.10.0",
