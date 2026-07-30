@@ -43,7 +43,7 @@ jobs:
           cache: "npm"
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: npm install vercel@latest
 
       - name: Install Project Dependencies
         run: npm ci
@@ -83,7 +83,7 @@ jobs:
           cache: "npm"
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: npm install vercel@latest
 
       - name: Install Project Dependencies
         run: npm ci
