@@ -84,13 +84,13 @@ jobs:
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
-
-      - name: Install Project Dependencies
-        run: npm ci
-
+        
       - name: Build Shared Package
         working-directory: packages/shared
         run: npm run build
+
+      - name: Install Project Dependencies
+        run: npm ci
 
       - name: Generate Prisma Client
         working-directory: apps/api
