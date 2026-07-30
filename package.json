@@ -1,15 +1,18 @@
 {
-    "name": "job-matching",
-    "private": true,
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
-    "scripts": {
-        "dev": "concurrently \"npm --workspace apps/web run dev\" \"npm --workspace apps/api run dev\"",
-        "build": "npm --workspace apps/web run build && npm --workspace apps/api run build"
-    },
-    "devDependencies": {
-        "concurrently": "^9.0.1"
-    }
+  "name": "job-matching",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:shared": "npm --workspace @jobmatch/shared run build",
+    "build:api": "npm --workspace api run build",
+    "build:web": "npm --workspace web run build",
+    "build": "npm run build:shared && npm run build:web && npm run build:api",
+    "dev": "concurrently \"npm --workspace apps/web run dev\" \"npm --workspace apps/api run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
 }
