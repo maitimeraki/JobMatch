@@ -64,6 +64,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        
+      - name: Build Shared Package
+        working-directory: packages/shared
+        run: npm run build
 
       - name: Generate Prisma client
         working-directory: apps/api
