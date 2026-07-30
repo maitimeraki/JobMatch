@@ -13,9 +13,6 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "paths": {
-      "@jobmatch/shared": ["../../packages/shared/src"]
-    }
   },
   "include": ["src"],
   "references": []
