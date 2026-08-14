@@ -24,9 +24,6 @@ env:
   NODE_VERSION: "24"
 
 jobs:
-  # ──────────────────────────────────────────────
-  # 1. DEPLOY FRONTEND TO VERCEL
-  # ──────────────────────────────────────────────
   deploy-web:
     name: Deploy Frontend → Vercel
     if: ${{ github.event_name == 'push' || github.event.inputs.deploy_web == 'true' }}
