@@ -2,7 +2,6 @@
   "outputDirectory": "dist",
   "functions": {
     "api/index.ts": {
-      "includeFiles": "packages/shared/dist/**",
       "memory": 256,
       "maxDuration": 10
     }
