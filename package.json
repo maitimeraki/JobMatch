@@ -6,10 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build:shared": "npm --workspace @jobmatch/shared run build",
-    "build:api": "npm --workspace api run build",
-    "build:web": "npm --workspace web run build",
-    "build": "npm run build:shared && npm run build:web && npm run build:api",
+    "build": "npm --workspace packages/shared run build && npm --workspace apps/web run build && npm --workspace apps/api run build"
     "dev": "concurrently \"npm --workspace apps/web run dev\" \"npm --workspace apps/api run dev\""
   },
   "devDependencies": {
