@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "npm run build --workspace=packages/shared && tsc -p tsconfig.json",
+    "build": "npm run build --workspace=@jobmatch/shared && tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -13,7 +13,7 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@jobmatch/shared":"*",
+    "@jobmatch/shared":"1.0.0",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.10.0",
