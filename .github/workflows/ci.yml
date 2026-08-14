@@ -49,6 +49,9 @@ jobs:
         run: npm run typecheck --workspace=@jobmatch/shared
         continue-on-error: true # Skip if shared package doesn't have a custom typecheck script
 
+      - name: Create vercel blob
+        run: npm install @vercel/blob
+
       - name: TypeCheck API
         run: npx tsc --project apps/api/tsconfig.json --noEmit
 
@@ -79,6 +82,9 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate --schema=apps/api/prisma/schema.prisma
+        
+      - name: Create vercel blob
+        run: npm install @vercel/blob
 
       - name: Build API
         run: npm run build --workspace=api # Replace with your api package name string if different
