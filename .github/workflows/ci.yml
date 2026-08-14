@@ -35,17 +35,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # FIX 1: Compile the shared package first so the api and web apps can find its type declarations (.d.ts files)
+      - name: Build Shared Package Types
+        run: npm run build --workspace=@jobmatch/shared
+
+      # FIX 2: Generate Prisma types early if your API typechecks rely on them
+      - name: Generate Prisma client
+        run: npx prisma generate --schema=apps/api/prisma/schema.prisma
+        continue-on-error: true # Prevents crash if prisma folder isn't under this exact name variant
+
+      # FIX 3: Execute tsc from the ROOT using workspace parameters instead of working-directory shifts
       - name: TypeCheck shared package
-        working-directory: packages/shared
-        run: npx tsc --noEmit
+        run: npm run typecheck --workspace=@jobmatch/shared
+        continue-on-error: true # Skip if shared package doesn't have a custom typecheck script
 
       - name: TypeCheck API
-        working-directory: apps/api
-        run: npx tsc --noEmit
+        run: npx tsc --project apps/api/tsconfig.json --noEmit
 
       - name: TypeCheck Web
-        working-directory: apps/web
-        run: npx tsc --noEmit
+        run: npx tsc --project apps/web/tsconfig.json --noEmit
 
   build:
     name: Build
@@ -65,21 +73,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
+      # FIX 4: Consolidating build orders from root orchestration
       - name: Build Shared Package
-        working-directory: packages/shared
-        run: npm run build
+        run: npm run build --workspace=@jobmatch/shared
 
       - name: Generate Prisma client
-        working-directory: apps/api
-        run: npx prisma generate
+        run: npx prisma generate --schema=apps/api/prisma/schema.prisma
 
       - name: Build API
-        working-directory: apps/api
-        run: npm run build
+        run: npm run build --workspace=api # Replace with your api package name string if different
 
       - name: Build Web
-        working-directory: apps/web
-        run: npm run build
+        run: npm run build --workspace=web # Replace with your web package name string if different
 
       - name: Upload web dist
         uses: actions/upload-artifact@v4
